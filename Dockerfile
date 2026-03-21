@@ -1,5 +1,5 @@
 # Multi-stage build for Token Ring distributed system
-FROM openjdk:11-jdk-slim as builder
+FROM eclipse-temurin:11-jdk as builder
 
 WORKDIR /app
 
@@ -11,7 +11,7 @@ COPY build/ build/
 RUN find src -name "*.java" -type f | xargs javac -cp build -d build
 
 # Runtime stage
-FROM openjdk:11-jre-slim
+FROM eclipse-temurin:11-jre
 
 WORKDIR /app
 
