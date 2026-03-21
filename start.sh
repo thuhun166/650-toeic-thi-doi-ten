@@ -1,10 +1,8 @@
 #!/bin/bash
-echo "=========================================="
-echo "Token Ring Server ID: $NODE_ID is starting..."
-echo "=========================================="
+echo "------------------------------------------"
+echo "Starting Parking Node ID: $NODE_ID"
+echo "Port: $PORT"
+echo "------------------------------------------"
 
-# Lưu ý quan trọng: Railway cấp MYSQL_URL dạng mysql://user:pass@host:port/db
-# Nhưng JDBC cần dạng jdbc:mysql://host:port/db
-# Chúng ta sẽ xử lý biến này trong code Java hoặc dùng biến môi trường riêng
-
+# Chạy ứng dụng với Classpath đầy đủ
 java -cp "build:lib/mysql-connector.jar" server.Main
