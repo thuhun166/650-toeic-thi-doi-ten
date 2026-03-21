@@ -1,0 +1,44 @@
+# Compiled Java files
+*.class
+*.jar
+*.exe
+
+# Build directories
+build/
+bin/
+dist/
+target/
+out/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Railway specific
+.railway/
+
+# Temp files
+*.tmp
+*.bak
+*~
