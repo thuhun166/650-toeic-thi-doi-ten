@@ -1,0 +1,7 @@
+[build]
+builder = "paketo"
+buildpacks = ["gcr.io/paketo-buildpacks/java"]
+
+[deploy]
+startCommand = "bash -lc 'find src -name \"*.java\" -exec javac -d build {} + && java -cp build server.Main'"
+port = 8080

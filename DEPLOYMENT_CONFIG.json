@@ -1,0 +1,315 @@
+{
+  "project_name": "DistributedTokenRing",
+  "project_description": "Distributed Token Ring System with 6 Servers and Lamport Clock",
+  "version": "1.0",
+  "created_date": "2026-03-21",
+  "total_nodes": 6,
+  "deployment_phases": {
+    "phase1_setup": {
+      "name": "Main Repo Setup",
+      "owner": "Project Manager",
+      "duration": "1 hour",
+      "steps": [
+        "Create main GitHub repository",
+        "Push source code to main repo",
+        "Create DEPLOYMENT_CONFIG.json",
+        "Create ARCHITECTURE.md",
+        "Create commit conventions documentation"
+      ]
+    },
+    "phase2_local_setup": {
+      "name": "Local Development Setup",
+      "owner": "Each Team Member",
+      "duration": "1.5 hours per person",
+      "steps": [
+        "Fork main repository",
+        "Clone forked repo to local machine",
+        "Create config_NODE_X.properties",
+        "Setup MySQL local (6 databases)",
+        "Compile code successfully",
+        "Test run Node 1 + Client locally"
+      ]
+    },
+    "phase3_railway_deploy": {
+      "name": "Railway Deployment",
+      "owner": "Each Team Member",
+      "duration": "2 hours per person",
+      "steps": [
+        "Create Railway account",
+        "Create Railway project from forked repo",
+        "Add MySQL plugin",
+        "Configure environment variables",
+        "Deploy to Railway",
+        "Collect Railway URL"
+      ]
+    },
+    "phase4_finalization": {
+      "name": "System Integration",
+      "owner": "Project Manager",
+      "duration": "30 minutes",
+      "steps": [
+        "Collect all 6 Railway URLs",
+        "Create PEERS variable string",
+        "Update PEERS in all 6 Railway projects",
+        "Wait for all redeploys to complete",
+        "Verify inter-node connectivity"
+      ]
+    },
+    "phase5_testing": {
+      "name": "End-to-End Testing",
+      "owner": "All Team Members",
+      "duration": "1 hour",
+      "steps": [
+        "Run universal client",
+        "Send INSERT request to Node 1",
+        "Monitor token passing through 6 nodes",
+        "Verify data persistence in each database",
+        "Test DELETE and QUERY operations",
+        "Document test results"
+      ]
+    }
+  },
+  "nodes": {
+    "node1": {
+      "node_id": 1,
+      "server_name": "Server1",
+      "assigned_to": "(To be assigned)",
+      "local_port": 2001,
+      "railway_port": 8080,
+      "mysql_database": "db1",
+      "table_name": "server1",
+      "next_node": 2,
+      "prev_node": 6,
+      "has_initial_token": true,
+      "railway_url": "(To be filled after deployment)"
+    },
+    "node2": {
+      "node_id": 2,
+      "server_name": "Server2",
+      "assigned_to": "(To be assigned)",
+      "local_port": 2002,
+      "railway_port": 8080,
+      "mysql_database": "db2",
+      "table_name": "server2",
+      "next_node": 3,
+      "prev_node": 1,
+      "has_initial_token": false,
+      "railway_url": "(To be filled after deployment)"
+    },
+    "node3": {
+      "node_id": 3,
+      "server_name": "Server3",
+      "assigned_to": "(To be assigned)",
+      "local_port": 2003,
+      "railway_port": 8080,
+      "mysql_database": "db3",
+      "table_name": "server3",
+      "next_node": 4,
+      "prev_node": 2,
+      "has_initial_token": false,
+      "railway_url": "(To be filled after deployment)"
+    },
+    "node4": {
+      "node_id": 4,
+      "server_name": "Server4",
+      "assigned_to": "(To be assigned)",
+      "local_port": 2004,
+      "railway_port": 8080,
+      "mysql_database": "db4",
+      "table_name": "server4",
+      "next_node": 5,
+      "prev_node": 3,
+      "has_initial_token": false,
+      "railway_url": "(To be filled after deployment)"
+    },
+    "node5": {
+      "node_id": 5,
+      "server_name": "Server5",
+      "assigned_to": "(To be assigned)",
+      "local_port": 2005,
+      "railway_port": 8080,
+      "mysql_database": "db5",
+      "table_name": "server5",
+      "next_node": 6,
+      "prev_node": 4,
+      "has_initial_token": false,
+      "railway_url": "(To be filled after deployment)"
+    },
+    "node6": {
+      "node_id": 6,
+      "server_name": "Server6",
+      "assigned_to": "(To be assigned)",
+      "local_port": 2006,
+      "railway_port": 8080,
+      "mysql_database": "db6",
+      "table_name": "server6",
+      "next_node": 1,
+      "prev_node": 5,
+      "has_initial_token": false,
+      "railway_url": "(To be filled after deployment)"
+    }
+  },
+  "ring_topology": {
+    "description": "Token passes in circular order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 1",
+    "initial_token_owner": "Node 1",
+    "token_passing_order": [1, 2, 3, 4, 5, 6]
+  },
+  "database_schema": {
+    "table_structure": {
+      "id": "INT PRIMARY KEY",
+      "content": "VARCHAR(255) NOT NULL",
+      "timestamp": "BIGINT NOT NULL",
+      "status": "VARCHAR(50) NOT NULL"
+    },
+    "databases": ["db1", "db2", "db3", "db4", "db5", "db6"]
+  },
+  "lamport_clock": {
+    "description": "Each node maintains a Lamport clock for causal event ordering",
+    "initial_value": 0,
+    "update_rule": "max(local_clock, received_clock) + 1"
+  },
+  "peers_variable_format": {
+    "description": "Comma-separated list of all node URLs",
+    "example": "node1.railway.app:8080,node2.railway.app:8080,node3.railway.app:8080,node4.railway.app:8080,node5.railway.app:8080,node6.railway.app:8080",
+    "environment_variable": "PEERS",
+    "field_separator": ","
+  },
+  "message_format": {
+    "description": "Inter-node communication message format",
+    "structure": "@$nodeId|tokenValue|lamportClock|serverName|messageType|action|content$@",
+    "message_types": ["TOKEN", "INSERT", "DELETE", "QUERY", "ACK"],
+    "example": "@$1|100000|10|Server1|INSERT|id=1|content=hello$@"
+  },
+  "environment_variables_local": {
+    "NODE_ID": "1 (to 6, unique per server)",
+    "PORT_LOCAL": "2001 (to 2006)",
+    "PORT_RAILWAY": "8080",
+    "MYSQL_HOST": "localhost (local) or Railway provided",
+    "MYSQL_PORT": "3306",
+    "MYSQL_USER": "root (local) or Railway provided",
+    "MYSQL_PASSWORD": "password (local) or Railway provided",
+    "MYSQL_DATABASE": "db1 (to db6)",
+    "MYSQL_URL": "jdbc:mysql://host:port/database",
+    "PEERS": "comma-separated list of all 6 node endpoints"
+  },
+  "project_files": {
+    "source_code": {
+      "server_packages": [
+        "src/server/Main.java (entry point)",
+        "src/server/TokenRing.java (token logic)",
+        "src/server/NodeHandler.java (request handler)",
+        "src/server/Database.java (MySQL connection)",
+        "src/server/RoutingTable.java (peer discovery)",
+        "src/server/VirtualCircle.java (ring representation)",
+        "src/server/MessageProcess.java (message parsing)",
+        "src/server/ProcessData.java (data extraction)",
+        "src/server/Connect.java (inter-node communication)",
+        "src/server/GetState.java (state management)",
+        "src/server/InitialServer.java (initialization)"
+      ],
+      "client_packages": [
+        "src/client/Client.java (universal test client GUI)"
+      ]
+    },
+    "configuration": [
+      "config.properties (template configuration)",
+      "config_NODE_1.properties to config_NODE_6.properties (per-node configs)",
+      "railway.toml (Railway deployment config)",
+      "DEPLOYMENT_CONFIG.json (this file)",
+      "ARCHITECTURE.md (system architecture)"
+    ],
+    "database": [
+      "setup.sql (database initialization script)"
+    ],
+    "documentation": [
+      "README.md (project overview)",
+      "HUONGDAN.md (Vietnamese guide)",
+      "DEPLOYMENT_GUIDE.md (comprehensive deployment)",
+      "ARCHITECTURE.md (technical architecture)"
+    ]
+  },
+  "github_workflow": {
+    "commit_conventions": [
+      "[NODE_X] - For commits related to specific node X",
+      "[SETUP] - For setup and configuration commits",
+      "[BUGFIX] - For bug fixes",
+      "[FEATURE] - For new features",
+      "[DOCS] - For documentation updates"
+    ],
+    "branch_naming": [
+      "feature/NODE_X_description",
+      "bugfix/issue_description",
+      "docs/documentation_topic"
+    ],
+    "pull_request_process": [
+      "Create feature branch",
+      "Make changes and commit",
+      "Push to your fork",
+      "Create pull request to main repo",
+      "PM reviews and merges",
+      "All team members pull latest from upstream"
+    ]
+  },
+  "quality_checklist": {
+    "code_quality": [
+      "[ ] Code compiles without errors",
+      "[ ] No hardcoded IPs/ports (use env variables)",
+      "[ ] Error handling implemented",
+      "[ ] Logging/debugging statements added",
+      "[ ] Code follows BaiDoXe pattern (separation of concerns)"
+    ],
+    "deployment_quality": [
+      "[ ] All environment variables set correctly",
+      "[ ] MySQL connection tested",
+      "[ ] Local testing passed",
+      "[ ] Railway deployment successful",
+      "[ ] Logs show no errors"
+    ],
+    "integration_quality": [
+      "[ ] Token passes through all 6 nodes",
+      "[ ] Data persists in all databases",
+      "[ ] Client can communicate with all nodes",
+      "[ ] Lamport clock increments correctly",
+      "[ ] No connection timeouts"
+    ]
+  },
+  "troubleshooting": {
+    "connection_refused": {
+      "cause": "Server not running or wrong port",
+      "solution": "Verify all 6 servers are running, check port config"
+    },
+    "mysql_error": {
+      "cause": "Database not created or wrong credentials",
+      "solution": "Run setup.sql, verify MYSQL_URL format"
+    },
+    "token_not_passing": {
+      "cause": "Token passing logic error",
+      "solution": "Check RoutingTable, verify PEERS config, check logs"
+    },
+    "railway_build_failure": {
+      "cause": "Build error or missing dependencies",
+      "solution": "Check Railway build logs, re-deploy"
+    }
+  },
+  "success_indicators": {
+    "local_phase": [
+      "Code compiles: javac succeeds",
+      "Node 1 starts without errors",
+      "Client connects to Node 1",
+      "Can insert/delete/query data"
+    ],
+    "railway_phase": [
+      "Railway deployment succeeds",
+      "App starts on Railway",
+      "MySQL plugin initialized",
+      "Logs show no errors"
+    ],
+    "integration_phase": [
+      "All 6 nodes accessible from Railway URLs",
+      "Token passes through all nodes in order",
+      "Data appears in corresponding databases",
+      "End-to-end client test succeeds",
+      "No latency or timeout issues"
+    ]
+  }
+}

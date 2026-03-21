@@ -1,4 +1,4 @@
-package distributed.server1;
+package server;
 
 public class VirtualCircle {
 

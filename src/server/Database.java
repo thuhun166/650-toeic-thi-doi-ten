@@ -1,4 +1,4 @@
-package distributed.server1;
+package server;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -8,14 +8,17 @@ import java.sql.Statement;
 public class Database {
 
     String drivername = "com.mysql.jdbc.Driver";
-    String connectionURL = "jdbc:mysql://localhost:3306/db1";
+    String connectionURL;
     String username = "root";
     String password = "root";
     Statement stmt = null;
     ResultSet rs = null;
     Connection conn;
+    String tableName;
 
-    public Database() {
+    public Database(String mysqlUrl, int nodeId) {
+        this.connectionURL = mysqlUrl;
+        this.tableName = "server" + nodeId;
         try {
             Class.forName(drivername).newInstance();
             conn = DriverManager.getConnection(connectionURL, username, password);
@@ -25,8 +28,8 @@ public class Database {
         }
     }
 
-    public void insertData(String vitri, String bienso, String loai, String mau, String gio) {
-        String sSQL = "INSERT INTO server1 VALUES ('" + vitri + "','" + bienso + "','" + loai + "','" + mau + "','" + gio + "')";
+    public void insertData(String id, String content, String time, String status) {
+        String sSQL = "INSERT INTO " + tableName + " VALUES ('" + id + "','" + content + "','" + time + "','" + status + "')";
         try {
             stmt.executeUpdate(sSQL);
         } catch (Exception e) {
@@ -36,19 +39,19 @@ public class Database {
 
     public void delData(String id) {
         try {
-            String sSQL = "DELETE FROM server1 WHERE vitri='" + id + "'";
+            String sSQL = "DELETE FROM " + tableName + " WHERE id='" + id + "'";
             stmt.executeUpdate(sSQL);
         } catch (Exception e) {
             System.out.println("SQLException: " + e.getMessage());
         }
     }
 
-    public String getData() {
+    public String getAllData() {
         String result = "";
         try {
-            rs = stmt.executeQuery("SELECT * FROM server1");
+            rs = stmt.executeQuery("SELECT * FROM " + tableName);
             while (rs.next()) {
-                result += rs.getString("vitri") + " " + rs.getString("bienso") + " " + rs.getString("loai") + " " + rs.getString("mau") + " " + rs.getString("gio") + "\n";
+                result += rs.getString("id") + " | " + rs.getString("content") + " | " + rs.getString("time") + " | " + rs.getString("status") + "\n";
             }
         } catch (Exception e) {
             System.out.println("SQLException: " + e.getMessage());

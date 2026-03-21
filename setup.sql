@@ -1,11 +1,10 @@
 CREATE DATABASE db1;
 USE db1;
 CREATE TABLE server1 (
-    vitri VARCHAR(50),
-    bienso VARCHAR(50),
-    loai VARCHAR(50),
-    mau VARCHAR(50),
-    gio VARCHAR(50)
+    id VARCHAR(50),
+    content TEXT,
+    time VARCHAR(50),
+    status VARCHAR(50)
 );
 
--- Repeat for db2 to db6, changing database name and table name accordingly
+-- For other nodes, create db2..db6 with server2..server6 tables
