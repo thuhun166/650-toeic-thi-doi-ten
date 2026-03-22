@@ -55,12 +55,12 @@ public class Database {
     private synchronized void connect() {
         try {
             loadDriver();
-            System.out.println("[DB] Connecting to " + connectionUrl + " as " + username);
+            System.out.println("[DB] Dang ket noi toi " + connectionUrl + " voi tai khoan " + username);
             connection = DriverManager.getConnection(connectionUrl, username, password);
-            System.out.println("[DB] Connected");
+            System.out.println("[DB] Ket noi thanh cong");
         } catch (Exception ex) {
             connection = null;
-            System.err.println("[DB ERROR] Unable to connect: " + ex.getMessage());
+            System.err.println("[DB ERROR] Khong the ket noi CSDL: " + ex.getMessage());
         }
     }
 
@@ -79,7 +79,7 @@ public class Database {
             }
             return connection != null && !connection.isClosed();
         } catch (SQLException ex) {
-            System.err.println("[DB ERROR] Connection check failed: " + ex.getMessage());
+            System.err.println("[DB ERROR] Loi kiem tra ket noi: " + ex.getMessage());
             return false;
         }
     }
@@ -115,7 +115,7 @@ public class Database {
             jobsStatement.executeUpdate();
             metadataStatement.executeUpdate();
         } catch (SQLException ex) {
-            System.err.println("[DB ERROR] Failed to initialize schema: " + ex.getMessage());
+            System.err.println("[DB ERROR] Khong the tao bang du lieu: " + ex.getMessage());
         }
     }
 
@@ -153,7 +153,7 @@ public class Database {
             statement.executeUpdate();
             return true;
         } catch (SQLException ex) {
-            System.err.println("[DB ERROR] Print record failed: " + ex.getMessage());
+            System.err.println("[DB ERROR] Khong the luu log in: " + ex.getMessage());
             return false;
         }
     }
@@ -187,14 +187,14 @@ public class Database {
             statement.executeUpdate();
             return true;
         } catch (SQLException ex) {
-            System.err.println("[DB ERROR] Cancel record failed: " + ex.getMessage());
+            System.err.println("[DB ERROR] Khong the luu log huy job: " + ex.getMessage());
             return false;
         }
     }
 
     public synchronized String getAllJobs() {
         if (!ensureConnection()) {
-            return "ERROR|Database unavailable";
+            return "LOI|Khong the truy cap CSDL";
         }
 
         StringBuilder result = new StringBuilder();
@@ -221,12 +221,12 @@ public class Database {
                         .append("\n");
             }
         } catch (SQLException ex) {
-            System.err.println("[DB ERROR] Query failed: " + ex.getMessage());
-            return "ERROR|Query failed";
+            System.err.println("[DB ERROR] Truy van that bai: " + ex.getMessage());
+            return "LOI|Truy van that bai";
         }
 
         if (result.length() == 0) {
-            return "NO_JOBS";
+            return "CHUA_CO_JOB";
         }
 
         return result.toString();
@@ -259,7 +259,7 @@ public class Database {
                 }
             }
         } catch (SQLException ex) {
-            System.err.println("[DB ERROR] Metadata read failed: " + ex.getMessage());
+            System.err.println("[DB ERROR] Doc metadata that bai: " + ex.getMessage());
         }
         return null;
     }
@@ -278,7 +278,7 @@ public class Database {
             statement.executeUpdate();
             return true;
         } catch (SQLException ex) {
-            System.err.println("[DB ERROR] Metadata write failed: " + ex.getMessage());
+            System.err.println("[DB ERROR] Ghi metadata that bai: " + ex.getMessage());
             return false;
         }
     }

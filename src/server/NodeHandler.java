@@ -26,11 +26,11 @@ public class NodeHandler implements Runnable {
 
             String message = in.readLine();
             if (message == null || message.trim().isEmpty()) {
-                out.println("ERROR|Empty request");
+                out.println("LOI|Yeu cau rong");
                 return;
             }
 
-            System.out.println("[Node " + nodeId + "] Received: " + message);
+            System.out.println("[Node " + nodeId + "] Nhan duoc: " + message);
 
             if (message.startsWith("TOKEN|")) {
                 handleTokenMessage(message, out);
@@ -48,17 +48,17 @@ public class NodeHandler implements Runnable {
             } else if (message.startsWith("CANCEL|") || message.startsWith("DELETE|")) {
                 out.println(tokenRing.submitCancelJob(message.substring(message.indexOf('|') + 1)));
             } else {
-                out.println("ERROR|Unknown command");
+                out.println("LOI|Lenh khong hop le");
             }
         } catch (IOException e) {
-            System.out.println("[Node " + nodeId + "] Handler error: " + e.getMessage());
+            System.out.println("[Node " + nodeId + "] Loi xu ly ket noi: " + e.getMessage());
         }
     }
 
     private void handleTokenMessage(String message, PrintWriter out) {
         String[] parts = message.split("\\|", 6);
         if (parts.length < 5) {
-            out.println("ERROR|Invalid token payload");
+            out.println("LOI|Goi token khong hop le");
             return;
         }
 
@@ -69,9 +69,9 @@ public class NodeHandler implements Runnable {
             long sequence = Long.parseLong(parts[4]);
 
             boolean accepted = tokenRing.receiveToken(fromNode, fromLamport, epoch, sequence);
-            out.println(accepted ? "TOKEN_RECEIVED" : "TOKEN_IGNORED");
+            out.println(accepted ? "DA_NHAN_TOKEN" : "BO_QUA_TOKEN");
         } catch (NumberFormatException ex) {
-            out.println("ERROR|Invalid token metadata");
+            out.println("LOI|Metadata token khong hop le");
         }
     }
 }

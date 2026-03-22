@@ -31,8 +31,8 @@ public class Main {
             throw new IllegalArgumentException("NODE_ID must be between 1 and " + routing.size());
         }
 
-        System.out.println("[Node " + nodeId + "] Starting print server on " + bindHost + ":" + port);
-        System.out.println("[Node " + nodeId + "] Ring peers: " + routing.describe());
+        System.out.println("[Node " + nodeId + "] Khoi dong may chu in tai " + bindHost + ":" + port);
+        System.out.println("[Node " + nodeId + "] Danh sach nut trong vong: " + routing.describe());
 
         Database db = new Database(mysqlUrl, nodeId);
         TokenRing tokenRing = new TokenRing(nodeId, routing, db, LAMPORT_CLOCK,
@@ -41,7 +41,7 @@ public class Main {
         Runtime.getRuntime().addShutdownHook(new Thread(tokenRing::shutdown));
 
         try (ServerSocket serverSocket = createServerSocket(bindHost, port)) {
-            System.out.println("[Node " + nodeId + "] Listening on port " + port);
+            System.out.println("[Node " + nodeId + "] Dang lang nghe tai cong " + port);
             tokenRing.start();
 
             while (true) {
@@ -49,7 +49,7 @@ public class Main {
                 new Thread(new NodeHandler(clientSocket, nodeId, tokenRing)).start();
             }
         } catch (IOException ex) {
-            System.err.println("[Node " + nodeId + "] Failed to start server: " + ex.getMessage());
+            System.err.println("[Node " + nodeId + "] Khong the khoi dong may chu: " + ex.getMessage());
         }
     }
 

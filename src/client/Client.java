@@ -32,30 +32,30 @@ public class Client extends JFrame {
     public Client() {
         this.endpoints = loadEndpoints();
 
-        setTitle("Distributed Print Client");
+        setTitle("Client In Phan Tan");
         setSize(760, 520);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
         JPanel controlPanel = new JPanel(new GridLayout(4, 2, 5, 5));
-        controlPanel.add(new JLabel("Select Print Server:"));
+        controlPanel.add(new JLabel("Chon server in:"));
         nodeSelector = new JComboBox<>(buildNodeChoices());
         nodeSelector.setSelectedIndex(0);
         controlPanel.add(nodeSelector);
 
-        controlPanel.add(new JLabel("Job ID:"));
+        controlPanel.add(new JLabel("Ma job:"));
         jobIdField = new JTextField();
         controlPanel.add(jobIdField);
 
-        controlPanel.add(new JLabel("Document Content:"));
+        controlPanel.add(new JLabel("Noi dung tai lieu:"));
         contentField = new JTextField();
         controlPanel.add(contentField);
 
         JPanel buttonPanel = new JPanel();
-        JButton printButton = new JButton("Submit Print Job");
-        JButton cancelButton = new JButton("Cancel Job");
-        JButton queryButton = new JButton("Query Jobs");
-        JButton statusButton = new JButton("Ring Status");
+        JButton printButton = new JButton("Gui Job In");
+        JButton cancelButton = new JButton("Huy Job");
+        JButton queryButton = new JButton("Xem Danh Sach Job");
+        JButton statusButton = new JButton("Trang Thai Vong");
         buttonPanel.add(printButton);
         buttonPanel.add(cancelButton);
         buttonPanel.add(queryButton);
@@ -70,8 +70,8 @@ public class Client extends JFrame {
 
         printButton.addActionListener(e -> submitPrintJob());
         cancelButton.addActionListener(e -> cancelJob());
-        queryButton.addActionListener(e -> sendCommand("QUERY", "Job log"));
-        statusButton.addActionListener(e -> sendCommand("STATUS", "Ring status"));
+        queryButton.addActionListener(e -> sendCommand("QUERY", "Nhat ky job"));
+        statusButton.addActionListener(e -> sendCommand("STATUS", "Trang thai vong"));
 
         setVisible(true);
     }
@@ -88,21 +88,21 @@ public class Client extends JFrame {
         String jobId = jobIdField.getText().trim();
         String content = contentField.getText().trim();
         if (jobId.isEmpty() || content.isEmpty()) {
-            resultArea.append("Error: Job ID and document content cannot be empty\n");
+            resultArea.append("Loi: Ma job va noi dung tai lieu khong duoc de trong\n");
             return;
         }
 
-        sendCommand("PRINT|" + jobId + "|" + content, "Submit print job");
+        sendCommand("PRINT|" + jobId + "|" + content, "Gui job in");
     }
 
     private void cancelJob() {
         String jobId = jobIdField.getText().trim();
         if (jobId.isEmpty()) {
-            resultArea.append("Error: Job ID cannot be empty\n");
+            resultArea.append("Loi: Ma job khong duoc de trong\n");
             return;
         }
 
-        sendCommand("CANCEL|" + jobId, "Cancel job");
+        sendCommand("CANCEL|" + jobId, "Huy job");
     }
 
     private void sendCommand(String command, String label) {
@@ -124,12 +124,12 @@ public class Client extends JFrame {
             }
 
             if (!hasOutput) {
-                resultArea.append("(no response)\n");
+                resultArea.append("(khong co phan hoi)\n");
             }
 
             resultArea.append("---\n");
         } catch (Exception ex) {
-            resultArea.append("Error connecting to Node " + selectedNode + " (" + endpoint.host + ":" + endpoint.port + "): "
+            resultArea.append("Loi ket noi toi Node " + selectedNode + " (" + endpoint.host + ":" + endpoint.port + "): "
                     + ex.getMessage() + "\n");
         }
     }

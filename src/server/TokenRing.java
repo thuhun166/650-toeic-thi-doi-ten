@@ -58,7 +58,7 @@ public class TokenRing {
                 tokenMonitorIntervalMs, tokenMonitorIntervalMs, TimeUnit.MILLISECONDS);
 
         if (nodeId == 1 && db.getLongMetadata(META_COORDINATOR_EPOCH, 0L) == 0L) {
-            issueNewToken("initial startup");
+            issueNewToken("khoi dong ban dau");
         }
     }
 
@@ -66,12 +66,12 @@ public class TokenRing {
         long requestLamport = lamportClock.incrementAndGet();
         ProcessData request = ProcessData.parsePrintPayload(payload, nodeId, requestLamport);
         if (request == null) {
-            return "ERROR|Expected PRINT|jobId|documentContent";
+            return "LOI|Cu phap dung: PRINT|jobId|noiDungTaiLieu";
         }
 
         pendingJobs.add(request);
-        System.out.println("[Node " + nodeId + "] Queued print job " + request.getJobId()
-                + " at Lamport " + requestLamport);
+        System.out.println("[Node " + nodeId + "] Da dua job in " + request.getJobId()
+                + " vao hang doi tai dong ho Lamport " + requestLamport);
 
         if (hasToken) {
             processPendingJobsLocked();
@@ -79,20 +79,20 @@ public class TokenRing {
         }
 
         return hasToken
-                ? "OK|Print job accepted and this node currently owns the token"
-                : "OK|Print job queued until token arrives";
+                ? "OK|Da nhan job in va nut nay dang giu token"
+                : "OK|Da xep job in vao hang doi, cho token den";
     }
 
     public synchronized String submitCancelJob(String jobId) {
         long requestLamport = lamportClock.incrementAndGet();
         ProcessData request = ProcessData.cancelRequest(jobId, nodeId, requestLamport);
         if (request == null) {
-            return "ERROR|Expected CANCEL|jobId";
+            return "LOI|Cu phap dung: CANCEL|jobId";
         }
 
         pendingJobs.add(request);
-        System.out.println("[Node " + nodeId + "] Queued cancel request for " + request.getJobId()
-                + " at Lamport " + requestLamport);
+        System.out.println("[Node " + nodeId + "] Da dua yeu cau huy job " + request.getJobId()
+                + " vao hang doi tai dong ho Lamport " + requestLamport);
 
         if (hasToken) {
             processPendingJobsLocked();
@@ -100,13 +100,13 @@ public class TokenRing {
         }
 
         return hasToken
-                ? "OK|Cancel request accepted and this node currently owns the token"
-                : "OK|Cancel request queued until token arrives";
+                ? "OK|Da nhan yeu cau huy va nut nay dang giu token"
+                : "OK|Da xep yeu cau huy vao hang doi, cho token den";
     }
 
     public synchronized boolean receiveToken(int fromNode, long fromLamport, long epoch, long sequence) {
         if (!isNewerToken(epoch, sequence)) {
-            System.out.println("[Node " + nodeId + "] Ignored stale or duplicate token epoch=" + epoch
+            System.out.println("[Node " + nodeId + "] Bo qua token cu hoac trung lap epoch=" + epoch
                     + " sequence=" + sequence);
             return false;
         }
@@ -120,7 +120,7 @@ public class TokenRing {
         lastTokenActivityAt = System.currentTimeMillis();
         persistHighestTokenState();
 
-        System.out.println("[Node " + nodeId + "] Accepted token from Node " + fromNode
+        System.out.println("[Node " + nodeId + "] Da nhan token tu Node " + fromNode
                 + " | epoch=" + epoch + " | sequence=" + sequence
                 + " | lamport=" + lamportClock.get());
 
@@ -162,21 +162,21 @@ public class TokenRing {
             boolean success;
 
             if (request.getOperation() == ProcessData.Operation.PRINT) {
-                System.out.println("[Node " + nodeId + "] Printing job " + request.getJobId()
-                        + " | submittedLamport=" + request.getSubmittedLamport()
-                        + " | processedLamport=" + processedLamport);
+                System.out.println("[Node " + nodeId + "] Dang xu ly in job " + request.getJobId()
+                        + " | lamportGui=" + request.getSubmittedLamport()
+                        + " | lamportXuLy=" + processedLamport);
                 success = db.recordPrintedJob(request, nodeId, processedLamport, processedAt);
             } else {
-                System.out.println("[Node " + nodeId + "] Cancelling job " + request.getJobId()
-                        + " | submittedLamport=" + request.getSubmittedLamport()
-                        + " | processedLamport=" + processedLamport);
+                System.out.println("[Node " + nodeId + "] Dang huy job " + request.getJobId()
+                        + " | lamportGui=" + request.getSubmittedLamport()
+                        + " | lamportXuLy=" + processedLamport);
                 success = db.recordCancelledJob(request, nodeId, processedLamport, processedAt);
             }
 
             if (success) {
                 pendingJobs.poll();
             } else {
-                System.out.println("[Node " + nodeId + "] DB unavailable, keeping request in queue");
+                System.out.println("[Node " + nodeId + "] CSDL chua san sang, giu nguyen yeu cau trong hang doi");
                 break;
             }
         }
@@ -201,7 +201,7 @@ public class TokenRing {
             }
 
             if (routing.size() <= 1) {
-                System.out.println("[Node " + nodeId + "] Single-node ring, token stays local");
+                System.out.println("[Node " + nodeId + "] He thong chi co 1 nut, token duoc giu tai cho");
                 processPendingJobsLocked();
                 lastTokenActivityAt = System.currentTimeMillis();
                 return;
@@ -225,7 +225,7 @@ public class TokenRing {
                 }
             }
 
-            System.out.println("[Node " + nodeId + "] Could not pass token, keeping it and retrying");
+            System.out.println("[Node " + nodeId + "] Chua chuyen duoc token, se giu lai va thu lai");
             scheduleTokenPassLocked(Math.max(tokenPassDelayMs, 2000L));
         }
     }
@@ -236,11 +236,11 @@ public class TokenRing {
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
             long currentLamport = lamportClock.incrementAndGet();
             out.println("TOKEN|" + nodeId + "|" + currentLamport + "|" + epoch + "|" + sequence);
-            System.out.println("[Node " + nodeId + "] Passed token to Node " + targetNodeId
+            System.out.println("[Node " + nodeId + "] Da chuyen token sang Node " + targetNodeId
                     + " | epoch=" + epoch + " | sequence=" + sequence);
             return true;
         } catch (IOException ex) {
-            System.out.println("[Node " + nodeId + "] Failed to pass token to Node " + targetNodeId
+            System.out.println("[Node " + nodeId + "] Khong the chuyen token sang Node " + targetNodeId
                     + ": " + ex.getMessage());
             return false;
         }
@@ -258,8 +258,8 @@ public class TokenRing {
             }
 
             if (nodeId == 1) {
-                System.out.println("[Node 1] Token watchdog detected a lost token after " + idleFor + " ms");
-                issueNewToken("watchdog recovery");
+                System.out.println("[Node 1] Bo giam sat phat hien token bi mat sau " + idleFor + " ms");
+                issueNewToken("phuc hoi boi watchdog");
             }
         }
     }
@@ -280,7 +280,7 @@ public class TokenRing {
         lastTokenActivityAt = System.currentTimeMillis();
         persistHighestTokenState();
 
-        System.out.println("[Node " + nodeId + "] Issued new token | reason=" + reason
+        System.out.println("[Node " + nodeId + "] Da tao token moi | ly do=" + reason
                 + " | epoch=" + tokenEpoch + " | sequence=" + tokenSequence
                 + " | lamport=" + currentLamport);
 
