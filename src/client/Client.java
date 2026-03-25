@@ -15,6 +15,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 public class Client extends JFrame {
 
@@ -28,7 +29,7 @@ public class Client extends JFrame {
     };
 
     private final NodeEndpoint[] endpoints;
-    private JComboBox<Integer> nodeSelector;
+    private JComboBox<String> nodeSelector;
     private JTextField jobIdField;
     private JTextField contentField;
     private JTextArea resultArea;
@@ -42,7 +43,7 @@ public class Client extends JFrame {
         setLayout(new BorderLayout());
 
         JPanel controlPanel = new JPanel(new GridLayout(4, 2, 5, 5));
-        controlPanel.add(new JLabel("Chon server in:"));
+        controlPanel.add(new JLabel("Chon may in:"));
         nodeSelector = new JComboBox<>(buildNodeChoices());
         nodeSelector.setSelectedIndex(0);
         controlPanel.add(nodeSelector);
@@ -60,10 +61,12 @@ public class Client extends JFrame {
         JButton cancelButton = new JButton("Huy Job");
         JButton queryButton = new JButton("Xem Danh Sach Job");
         JButton statusButton = new JButton("Trang Thai Vong");
+        JButton serverGuiButton = new JButton("Mo GUI Quan Ly Server");
         buttonPanel.add(printButton);
         buttonPanel.add(cancelButton);
         buttonPanel.add(queryButton);
         buttonPanel.add(statusButton);
+        buttonPanel.add(serverGuiButton);
 
         resultArea = new JTextArea();
         resultArea.setEditable(false);
@@ -76,14 +79,16 @@ public class Client extends JFrame {
         cancelButton.addActionListener(e -> cancelJob());
         queryButton.addActionListener(e -> sendCommand("QUERY", "Nhat ky job"));
         statusButton.addActionListener(e -> sendCommand("STATUS", "Trang thai vong"));
+        serverGuiButton.addActionListener(e -> new ServerManagerGUI());
 
+        setLocationRelativeTo(null);
         setVisible(true);
     }
 
-    private Integer[] buildNodeChoices() {
-        Integer[] nodeChoices = new Integer[endpoints.length];
+    private String[] buildNodeChoices() {
+        String[] nodeChoices = new String[endpoints.length];
         for (int i = 0; i < endpoints.length; i++) {
-            nodeChoices[i] = i + 1;
+            nodeChoices[i] = "May in " + (i + 1) + " - " + endpoints[i].host + ":" + endpoints[i].port;
         }
         return nodeChoices;
     }
@@ -110,8 +115,9 @@ public class Client extends JFrame {
     }
 
     private void sendCommand(String command, String label) {
-        int selectedNode = (Integer) nodeSelector.getSelectedItem();
-        NodeEndpoint endpoint = endpoints[selectedNode - 1];
+        int selectedIndex = nodeSelector.getSelectedIndex();
+        int selectedNode = selectedIndex + 1;
+        NodeEndpoint endpoint = endpoints[selectedIndex];
 
         try (Socket socket = new Socket(endpoint.host, endpoint.port);
              PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
@@ -170,7 +176,7 @@ public class Client extends JFrame {
     }
 
     public static void main(String[] args) {
-        new Client();
+        SwingUtilities.invokeLater(Client::new);
     }
 
     private static class NodeEndpoint {

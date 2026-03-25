@@ -34,6 +34,13 @@ public class NodeHandler implements Runnable {
 
             if (message.startsWith("TOKEN|")) {
                 handleTokenMessage(message, out);
+            } else if ("LOGS".equalsIgnoreCase(message)) {
+                String data = tokenRing.getEventLog();
+                out.print(data);
+                if (!data.endsWith("\n")) {
+                    out.print("\n");
+                }
+                out.flush();
             } else if ("QUERY".equalsIgnoreCase(message)) {
                 String data = tokenRing.getJobLog();
                 out.print(data);

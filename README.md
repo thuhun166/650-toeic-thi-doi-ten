@@ -25,7 +25,8 @@ So in this implementation:
 - 1 client sends print or cancel requests to any server
 - Each server keeps a local queue of pending jobs
 - Only the server holding the token may enter the critical section and update its print log
-- Print results are stored in MySQL tables `nodeX_print_jobs` and `nodeX_ring_metadata`
+- Print results are stored in MySQL tables `print_jobs` and `ring_metadata`
+- Each server connects to its own database, for example `print_ring_node1`, `print_ring_node2`, ..., `print_ring_node6`
 
 ## Message protocol
 
@@ -93,12 +94,12 @@ javac -cp "lib/*" -d build src/server/*.java src/client/*.java
 Run 6 nodes in 6 terminals:
 
 ```powershell
-$env:NODE_ID="1"; $env:PORT="2001"; $env:MYSQL_URL="jdbc:mysql://localhost:3306/print_ring_demo"; $env:PEERS="localhost:2001,localhost:2002,localhost:2003,localhost:2004,localhost:2005,localhost:2006"; java -cp "build;lib/*" server.Main
-$env:NODE_ID="2"; $env:PORT="2002"; $env:MYSQL_URL="jdbc:mysql://localhost:3306/print_ring_demo"; $env:PEERS="localhost:2001,localhost:2002,localhost:2003,localhost:2004,localhost:2005,localhost:2006"; java -cp "build;lib/*" server.Main
-$env:NODE_ID="3"; $env:PORT="2003"; $env:MYSQL_URL="jdbc:mysql://localhost:3306/print_ring_demo"; $env:PEERS="localhost:2001,localhost:2002,localhost:2003,localhost:2004,localhost:2005,localhost:2006"; java -cp "build;lib/*" server.Main
-$env:NODE_ID="4"; $env:PORT="2004"; $env:MYSQL_URL="jdbc:mysql://localhost:3306/print_ring_demo"; $env:PEERS="localhost:2001,localhost:2002,localhost:2003,localhost:2004,localhost:2005,localhost:2006"; java -cp "build;lib/*" server.Main
-$env:NODE_ID="5"; $env:PORT="2005"; $env:MYSQL_URL="jdbc:mysql://localhost:3306/print_ring_demo"; $env:PEERS="localhost:2001,localhost:2002,localhost:2003,localhost:2004,localhost:2005,localhost:2006"; java -cp "build;lib/*" server.Main
-$env:NODE_ID="6"; $env:PORT="2006"; $env:MYSQL_URL="jdbc:mysql://localhost:3306/print_ring_demo"; $env:PEERS="localhost:2001,localhost:2002,localhost:2003,localhost:2004,localhost:2005,localhost:2006"; java -cp "build;lib/*" server.Main
+$env:NODE_ID="1"; $env:PORT="2001"; $env:MYSQL_URL="jdbc:mysql://localhost:3306/print_ring_node1"; $env:PEERS="localhost:2001,localhost:2002,localhost:2003,localhost:2004,localhost:2005,localhost:2006"; java -cp "build;lib/*" server.Main
+$env:NODE_ID="2"; $env:PORT="2002"; $env:MYSQL_URL="jdbc:mysql://localhost:3306/print_ring_node2"; $env:PEERS="localhost:2001,localhost:2002,localhost:2003,localhost:2004,localhost:2005,localhost:2006"; java -cp "build;lib/*" server.Main
+$env:NODE_ID="3"; $env:PORT="2003"; $env:MYSQL_URL="jdbc:mysql://localhost:3306/print_ring_node3"; $env:PEERS="localhost:2001,localhost:2002,localhost:2003,localhost:2004,localhost:2005,localhost:2006"; java -cp "build;lib/*" server.Main
+$env:NODE_ID="4"; $env:PORT="2004"; $env:MYSQL_URL="jdbc:mysql://localhost:3306/print_ring_node4"; $env:PEERS="localhost:2001,localhost:2002,localhost:2003,localhost:2004,localhost:2005,localhost:2006"; java -cp "build;lib/*" server.Main
+$env:NODE_ID="5"; $env:PORT="2005"; $env:MYSQL_URL="jdbc:mysql://localhost:3306/print_ring_node5"; $env:PEERS="localhost:2001,localhost:2002,localhost:2003,localhost:2004,localhost:2005,localhost:2006"; java -cp "build;lib/*" server.Main
+$env:NODE_ID="6"; $env:PORT="2006"; $env:MYSQL_URL="jdbc:mysql://localhost:3306/print_ring_node6"; $env:PEERS="localhost:2001,localhost:2002,localhost:2003,localhost:2004,localhost:2005,localhost:2006"; java -cp "build;lib/*" server.Main
 ```
 
 Run the client:
@@ -116,7 +117,7 @@ Each service needs:
 - `NODE_ID`: `1` to `6`
 - `PORT`: `8080`
 - `BIND_HOST`: `0.0.0.0`
-- `MYSQL_URL`: database URL
+- `MYSQL_URL`: database URL of that specific server
 - `PEERS`: both service addresses in ring order
 - `TOKEN_PASS_DELAY_MS`: optional, default `1500`
 - `TOKEN_MONITOR_INTERVAL_MS`: optional, default `2000`
@@ -142,6 +143,6 @@ Railway docs used for the deployment assumptions:
 
 ## Optional SQL bootstrap
 
-If you want to pre-create the local shared database, use [setup.sql](C:/Users/Administrator/Desktop/DistributedSystemProject/setup.sql).
+If you want to pre-create the local databases manually, use [setup.sql](C:/Users/Administrator/Desktop/DistributedSystemProject/setup.sql).
 
-In normal use, the application will auto-create node-specific tables such as `node1_print_jobs`, `node1_ring_metadata`, ..., `node6_print_jobs`, and `node6_ring_metadata` after the target database exists.
+In normal use, the application will auto-create `print_jobs` and `ring_metadata` inside the database referenced by `MYSQL_URL`. This means you do not need to open phpMyAdmin to create tables manually, as long as the target database already exists.

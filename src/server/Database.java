@@ -10,6 +10,8 @@ public class Database {
 
     private static final String MODERN_DRIVER = "com.mysql.cj.jdbc.Driver";
     private static final String LEGACY_DRIVER = "com.mysql.jdbc.Driver";
+    private static final String JOBS_TABLE_NAME = "print_jobs";
+    private static final String METADATA_TABLE_NAME = "ring_metadata";
 
     private final String connectionUrl;
     private final String jobsTableName;
@@ -19,9 +21,8 @@ public class Database {
     private Connection connection;
 
     public Database(String mysqlUrl, int nodeId) {
-        String tablePrefix = "node" + nodeId;
-        this.jobsTableName = tablePrefix + "_print_jobs";
-        this.metadataTableName = tablePrefix + "_ring_metadata";
+        this.jobsTableName = JOBS_TABLE_NAME;
+        this.metadataTableName = METADATA_TABLE_NAME;
         this.connectionUrl = normalizeJdbcUrl(mysqlUrl, nodeId);
         connect();
         initializeSchema();
@@ -31,7 +32,7 @@ public class Database {
         String normalized = mysqlUrl;
 
         if (normalized == null || normalized.trim().isEmpty()) {
-            normalized = "jdbc:mysql://localhost:3306/db" + nodeId;
+            normalized = "jdbc:mysql://localhost:3306/print_ring_node" + nodeId;
         }
 
         normalized = normalized.trim();
